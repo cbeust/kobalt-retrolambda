@@ -1,9 +1,11 @@
 import com.beust.kobalt.plugin.kotlin.kotlinProject
 import com.beust.kobalt.plugin.packaging.assemble
+import com.beust.kobalt.plugin.publish.jcenter
 
 val p = kotlinProject {
     name = "kobalt-retrolambda"
-    version = "0.1"
+    group = "com.beust"
+    version = "0.2"
 
     dependencies {
         compile("com.beust:kobalt:")
@@ -13,5 +15,8 @@ val p = kotlinProject {
         mavenJars {
             fatJar = true
         }
+    }
+
+    jcenter {
     }
 }
