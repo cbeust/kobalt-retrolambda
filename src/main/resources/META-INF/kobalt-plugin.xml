@@ -1,0 +1,6 @@
+<kobalt-plugin>
+    <name>kobalt-retrolambda</name>
+    <plugin-actors>
+        <class-name>com.beust.kobalt.plugin.retrolambda.RetrolambdaPlugin</class-name>
+    </plugin-actors>
+</kobalt-plugin>
