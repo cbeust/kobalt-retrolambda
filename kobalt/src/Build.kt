@@ -4,6 +4,7 @@ import com.beust.kobalt.plugin.publish.jcenter
 
 val p = kotlinProject {
     name = "kobalt-retrolambda"
+    artifactId = name
     group = "com.beust"
     version = "0.2"
 
