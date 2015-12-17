@@ -86,7 +86,7 @@ fun Project.retrolambda(init: RetrolambdaConfig.() -> Unit) = let {
     }
 }
 
-fun main(argv: Array<String>) {
-    println("MAIN")
-    com.beust.kobalt.main(argv)
-}
+//fun main(argv: Array<String>) {
+//    println("MAIN")
+//    com.beust.kobalt.main(argv)
+//}
