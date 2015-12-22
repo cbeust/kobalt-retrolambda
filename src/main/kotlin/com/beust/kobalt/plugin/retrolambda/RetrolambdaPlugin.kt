@@ -6,16 +6,21 @@ import com.beust.kobalt.api.*
 import com.beust.kobalt.api.annotation.Directive
 import com.beust.kobalt.api.annotation.Task
 import com.beust.kobalt.internal.JvmCompilerPlugin
+import com.beust.kobalt.maven.DependencyManager
 import com.beust.kobalt.maven.dependency.MavenDependency
 import com.beust.kobalt.misc.RunCommand
+import com.google.inject.Inject
+import com.google.inject.Singleton
 import java.io.File
 
 /**
  * Run Retrolambda on the classes right after "compile". This plug-in automatically downloads and uses
- * the most recent retrolambda.jar and it can be configured with the `retrolambda{}` directive. See
- * the RetrolambdaConfig class for what can be configured.
+ * the most recent retrolambda.jar and it can be configured with the `retrolambda{}` directive.
  */
-class RetrolambdaPlugin : ConfigPlugin<RetrolambdaConfig>(), IClasspathContributor, ITaskContributor {
+@Singleton
+class RetrolambdaPlugin @Inject constructor(val dependencyManager: DependencyManager,
+        val taskContributor : TaskContributor)
+: ConfigPlugin<RetrolambdaConfig>(), IClasspathContributor, ITaskContributor {
 
     override val name = PLUGIN_NAME
 
@@ -44,32 +49,30 @@ class RetrolambdaPlugin : ConfigPlugin<RetrolambdaConfig>(), IClasspathContribut
     fun taskRetrolambda(project: Project): TaskResult {
         val config = configurationFor(project)
         val result =
-            if (config != null) {
-                val classesDir = project.classesDir(context)
-                val classpath = (context.dependencyManager.calculateDependencies(project, context, projects,
-                        project.compileDependencies)
-                        .map {
-                    it.jarFile.get()
-                } + classesDir).joinToString(File.pathSeparator)
+                if (config != null) {
+                    val classesDir = project.classesDir(context)
+                    val classpath = (dependencyManager.calculateDependencies(project, context, projects,
+                            project.compileDependencies)
+                            .map {
+                                it.jarFile.get()
+                            } + classesDir).joinToString(File.pathSeparator)
 
-                val args = listOf(
-                        "-Dretrolambda.inputDir=" + classesDir,
-                        "-Dretrolambda.classpath=" + classpath,
-                        "-Dretrolambda.bytecodeVersion=${config.byteCodeVersion}",
-                        "-jar", JAR.jarFile.get().path)
+                    val args = listOf(
+                            "-Dretrolambda.inputDir=" + classesDir,
+                            "-Dretrolambda.classpath=" + classpath,
+                            "-Dretrolambda.bytecodeVersion=${config.byteCodeVersion}",
+                            "-jar", JAR.jarFile.get().path)
 
-                val result = RunCommand("java").apply {
-                    directory = File(project.directory)
-                }.run(args)
-                TaskResult(result == 0)
-            } else {
-                TaskResult()
-            }
+                    val result = RunCommand("java").apply {
+                        directory = File(project.directory)
+                    }.run(args)
+                    TaskResult(result == 0)
+                } else {
+                    TaskResult()
+                }
 
         return result
     }
-
-    val taskContributor : TaskContributor = TaskContributor()
 
     // ITaskContributor
     override fun tasksFor(context: KobaltContext) : List<DynamicTask> = taskContributor.dynamicTasks
@@ -86,7 +89,8 @@ fun Project.retrolambda(init: RetrolambdaConfig.() -> Unit) = let {
     }
 }
 
-//fun main(argv: Array<String>) {
-//    println("MAIN")
+fun main(argv: Array<String>) {
+    // Need to depend on "com.beust:kobalt:0.356" instead of "com.beust:kobalt-plugin-api:0.356"
+    // for this to compile
 //    com.beust.kobalt.main(argv)
-//}
+}
