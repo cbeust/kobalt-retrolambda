@@ -1,0 +1,6 @@
+.kobalt
+kobaltBuild
+local.properties
+.idea/*
+!.idea/modules.xml
+
