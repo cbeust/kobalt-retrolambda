@@ -1,7 +1,7 @@
 
 import com.beust.kobalt.plugin.kotlin.kotlinProject
 import com.beust.kobalt.plugin.packaging.assemble
-import com.beust.kobalt.plugin.publish.jcenter
+import com.beust.kobalt.plugin.publish.*
 import com.beust.kobalt.repos
 
 val r = repos("https://dl.bintray.com/cbeust/maven")
@@ -26,7 +26,7 @@ val p = kotlinProject {
         }
     }
 
-    jcenter {
+    bintray {
         publish = true
     }
 }
