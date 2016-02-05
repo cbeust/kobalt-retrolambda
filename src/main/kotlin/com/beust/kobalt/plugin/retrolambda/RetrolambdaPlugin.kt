@@ -52,6 +52,7 @@ class RetrolambdaPlugin @Inject constructor(val dependencyManager: DependencyMan
         val result =
                 if (config != null) {
                     val classesDir = project.classesDir(context)
+                    val projects = project.projectProperties.get("dependentProjects") as List<ProjectDescription>
                     val classpath = (dependencyManager.calculateDependencies(project, context, projects,
                             project.compileDependencies)
                             .map {
