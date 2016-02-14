@@ -17,7 +17,7 @@ val p = project {
     dependencies {
 //        compile(file(homeDir("kotlin/kobalt/kobaltBuild/libs/kobalt-0.356.jar")))
 //         compile("com.beust:kobalt:0.356")
-      compile("com.beust:kobalt-plugin-api:0.503")
+      compile("com.beust:kobalt-plugin-api:0.520")
     }
 
     assemble {

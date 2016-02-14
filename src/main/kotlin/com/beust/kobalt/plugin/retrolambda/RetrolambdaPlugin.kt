@@ -41,7 +41,7 @@ class RetrolambdaPlugin @Inject constructor(val dependencyManager: DependencyMan
 
     // IClasspathContributor
     // Only add the Retrolambda jar file if the user specified a `retrolambda{}` directive in their build file
-    override fun entriesFor(project: Project?) =
+    override fun classpathEntriesFor(project: Project?, context: KobaltContext) =
             if (project != null && configurationFor(project) != null) listOf(JAR)
             else emptyList()
 
