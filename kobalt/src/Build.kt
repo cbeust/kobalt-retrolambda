@@ -12,7 +12,7 @@ val p = project {
     name = "kobalt-retrolambda"
     artifactId = name
     group = "com.beust"
-    version = "0.8"
+    version = "0.9"
 
     dependencies {
 //        compile(file(homeDir("kotlin/kobalt/kobaltBuild/libs/kobalt-0.356.jar")))
