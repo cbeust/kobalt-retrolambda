@@ -3,4 +3,5 @@ kobaltBuild
 local.properties
 .idea/*
 !.idea/modules.xml
+lib/kotlin-r*jar
 
