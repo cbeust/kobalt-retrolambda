@@ -3,11 +3,13 @@ package com.beust.kobalt.plugin.retrolambda
 import com.beust.kobalt.Plugins
 import com.beust.kobalt.TaskResult
 import com.beust.kobalt.api.*
+import com.beust.kobalt.api.Kobalt.Companion.context
 import com.beust.kobalt.api.annotation.Directive
 import com.beust.kobalt.api.annotation.Task
 import com.beust.kobalt.internal.JvmCompilerPlugin
+import com.beust.kobalt.internal.TaskManager
 import com.beust.kobalt.maven.DependencyManager
-import com.beust.kobalt.maven.dependency.MavenDependency
+import com.beust.kobalt.maven.aether.Scope
 import com.beust.kobalt.misc.RunCommand
 import com.google.inject.Inject
 import com.google.inject.Singleton
@@ -20,9 +22,8 @@ import java.nio.charset.Charset
  */
 @Singleton
 class RetrolambdaPlugin @Inject constructor(val dependencyManager: DependencyManager,
-        val taskContributor : TaskContributor)
-: ConfigPlugin<RetrolambdaConfig>(), IClasspathContributor, ITaskContributor {
-
+        val taskContributor : TaskContributor, override var taskManager: TaskManager)
+    : ConfigActor<RetrolambdaConfig>(), IClasspathContributor, ITaskContributor, IPlugin {
     override val name = PLUGIN_NAME
 
     companion object {
@@ -30,13 +31,13 @@ class RetrolambdaPlugin @Inject constructor(val dependencyManager: DependencyMan
         // Note the use of the versionless id here (no version number specified, ends with ":") so that
         // we will always be using the latest version of the Retrolambda jar
         const val ID = "net.orfjackal.retrolambda:retrolambda:"
-        val JAR = MavenDependency.create(ID)
+        val JAR = DependencyManager.create(ID)
     }
 
     override fun apply(project: Project, context: KobaltContext) {
         super.apply(project, context)
         taskContributor.addVariantTasks(this, project, context, "retrolambda", runTask = { taskRetrolambda(project) },
-                runBefore = listOf("generateDex"), alwaysRunAfter = listOf("compile"))
+                runBefore = listOf("generateDex"), runAfter = listOf("compile"))
     }
 
     // IClasspathContributor
@@ -51,10 +52,11 @@ class RetrolambdaPlugin @Inject constructor(val dependencyManager: DependencyMan
         val config = configurationFor(project)
         val result =
                 if (config != null) {
-                    val classesDir = project.classesDir(context)
+                    val classesDir = project.classesDir(context!!)
                     val projects = project.projectProperties.get("dependentProjects") as List<ProjectDescription>
-                    val classpath = (dependencyManager.calculateDependencies(project, context, projects,
-                            project.compileDependencies)
+                    val classpath = (dependencyManager.calculateDependencies(project, context!!,
+                            scopes = listOf(Scope.COMPILE),
+                            passedDependencies = project.compileDependencies)
                             .map {
                                 it.jarFile.get()
                             } + classesDir).joinToString("\n")
@@ -82,7 +84,19 @@ class RetrolambdaPlugin @Inject constructor(val dependencyManager: DependencyMan
     }
 
     // ITaskContributor
-    override fun tasksFor(context: KobaltContext) : List<DynamicTask> = taskContributor.dynamicTasks
+    override fun tasksFor(project: Project, context: KobaltContext) : List<DynamicTask> = taskContributor.dynamicTasks
+
+    // IPlugin
+    override fun accept(project: Project): Boolean {
+        // Should return true only for Android projects
+        return true
+    }
+
+    // IPlugin
+    override fun shutdown() {
+    }
+
+
 }
 
 class RetrolambdaConfig(var byteCodeVersion: Int = 50) {
